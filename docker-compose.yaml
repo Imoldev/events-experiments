@@ -1,0 +1,54 @@
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+    ports:
+      - '80:80'
+    volumes:
+      - ./docker/nginx/fastcgi_params:/etc/nginx/fastcgi_params
+      - ./docker/nginx/conf:/etc/nginx/conf.d
+      - ./www:/var/www/events-experiments
+
+  php-fpm:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile-fpm
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    environment:
+      APP_ENV: local
+      SERVER_NAME: _
+      SERVER_PORT: 80
+    volumes:
+      - ./www:/var/www/events-experiments
+      - ./docker/php/ini_dir:/usr/local/etc/php
+
+  cli:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile-cli
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    environment:
+      APP_ENV: local
+      SERVER_NAME: _
+      SERVER_PORT: 80
+    volumes:
+      - ./www:/var/www/events-experiments
+      - ./docker/php/ini_dir:/usr/local/etc/php
+    tty: true
+
+
+  db:
+    build:
+      context: ./docker/db
+    restart: on-failure
+    ports:
+      - 3308:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: dbroot
+    volumes:
+      - ./docker/db/config:/etc/mysql/my.cnf
+      - ./docker/db/dbdata:/var/lib/mysql

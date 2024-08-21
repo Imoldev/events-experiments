@@ -1,0 +1,19 @@
+FROM php:8.3-fpm
+
+ARG UID
+ARG GID
+
+WORKDIR /var/www/events-experiments
+
+RUN docker-php-ext-install pdo pdo_mysql && \
+    apt update && apt install -y htop procps
+
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+
+RUN usermod -u ${UID} www-data
+RUN groupmod -g ${GID} www-data
+RUN mkdir /home/www-data && \
+    usermod --home /home/www-data www-data && \
+    chown -R www-data:www-data /home/www-data
+
+USER www-data
