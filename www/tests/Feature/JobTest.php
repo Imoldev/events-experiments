@@ -1,12 +1,18 @@
 <?php
 
 
-use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
+
+beforeAll(function () {
+
+});
 
 it('Job test', function () {
 
-    $job = (new \App\Jobs\ProcessEvent())->onQueue('events');
+    $app = require  __DIR__ . '/../../bootstrap/app.php';
 
-    dispatch($job);
+    $kernel= $app->make(\Illuminate\Contracts\Console\Kernel::class);
+    $kernel->bootstrap();
+    $job = \App\Jobs\ProcessEvent::dispatch();
 
 });
