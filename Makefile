@@ -26,12 +26,18 @@ mysql-bash:
 	docker compose exec db bash
 
 create_db:
-	docker compose exec db mysql -hdb -uroot -pdbroot -e "CREATE DATABASE ID NOT EXISTS events_experiments_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+	docker compose exec db mysql -hdb -uroot -pdbroot -e "\
+CREATE DATABASE IF NOT EXISTS events_experiments_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; \
+SET global general_log = 'OFF'; \
+SET global log_output = 'table'; \
+ALTER TABLE mysql.general_log ENGINE = MyISAM; \
+SET global general_log = 'ON' \
+"
 
 drop_db:
 	docker compose exec db mysql -hdb -uroot -pdbroot -e "DROP DATABASE IF EXISTS events_experiments_db;"
 
-create_db:
+migrate_db:
 	UID=$(UID) GID=$(GID) docker compose exec cli php artisan migrate --force
 
 seeds:
@@ -65,7 +71,7 @@ psalm:
 clear-log:
 	UID=$(UID) GID=$(GID) docker compose exec cli truncate -s 0 ./storage/logs/laravel.log
 
-recreate-db: drop_db create_db seeds
+recreate-db: drop_db create_db migrate_db seeds
 
 test-integration: clear-log drop_db create_db seeds do-test-integration
 
