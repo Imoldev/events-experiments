@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Support\Facades\Cache;
 
 class ProcessEvent implements ShouldQueue
 {
@@ -29,13 +29,16 @@ class ProcessEvent implements ShouldQueue
     public function handle(): void
     {
         sleep(1);
-        if ($this->number === 1) {
-            throw new \Exception('Something went wrong');
-        }
+        $lock = Cache::lock('events_lock', 0, (string)$this->number);
+        if ($lock->get()) {
+            if ($this->number === 1) {
+                throw new \Exception('Something went wrong');
+            }
+            $lock->release();
+        } else {
+            
+        };
+
     }
 
-    public function middleware(): array
-    {
-        return [new WithoutOverlapping('stream_id')];
-    }
 }
