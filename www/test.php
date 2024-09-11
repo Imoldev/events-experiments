@@ -9,8 +9,7 @@ $app = require_once  __DIR__ . '/bootstrap/app.php';
 $kernel= $app->make(\Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
-//Cache::put('key', 'value');
-//$lock = Cache::lock('baz');
-//$lock->get();
-\App\Jobs\ProcessEvent::dispatch(1);
-\App\Jobs\ProcessEvent::dispatch(2);
+for ($i=1; $i<=10; $i++){
+    \App\Jobs\ProcessEventWithErrors::dispatch($i);
+    \App\Jobs\ProcessEvent::dispatch($i);
+}

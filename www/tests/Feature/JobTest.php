@@ -13,6 +13,6 @@ it('Job test', function () {
 
     $kernel= $app->make(\Illuminate\Contracts\Console\Kernel::class);
     $kernel->bootstrap();
-    $job = \App\Jobs\ProcessEvent::dispatch();
+    $job = \App\Jobs\ProcessEventWithErrors::dispatch();
 
 });

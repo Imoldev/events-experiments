@@ -7,7 +7,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Cache;
 
-class ProcessEvent implements ShouldQueue
+class ProcessEventWithErrors implements ShouldQueue
 {
     use Queueable;
 
@@ -29,10 +29,13 @@ class ProcessEvent implements ShouldQueue
     public function handle(): void
     {
         usleep(10000);
-        echo 'ProcessEvent ' . $this->attempts() . \PHP_EOL;
-        $lock = Cache::lock('0191d6ef-a669-7774-9d2d-e2044db90e26', 0, (string) $this->number);
+        echo 'ProcessEventWithErrors ' . $this->attempts() . \PHP_EOL;
+        $lock = Cache::lock('0191d6ee-26d3-7254-84ec-3bab683315c6', 0, (string) $this->number);
         if ($lock->get()) {
             echo $this->number . ' work' . \PHP_EOL;
+            if ($this->attempts() < 15) {
+                throw new \Exception('Something went wrong');
+            }
             $lock->release();
         } else {
             echo $this->number . ' release' . \PHP_EOL;
