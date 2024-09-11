@@ -71,10 +71,10 @@ psalm:
 clear-log:
 	UID=$(UID) GID=$(GID) docker compose exec cli truncate -s 0 ./storage/logs/laravel.log
 
-recreate-db: drop_db create_db migrate_db seeds
+recreate-db: drop_db create_db migrate_db
 
 test-integration: clear-log drop_db create_db seeds do-test-integration
 
-test-api: clear-log drop_db create_db seeds do-test-api
+test-api: clear-log recreate-db do-test-api
 
-test-all: clear-log drop_db create_db seeds do-test-all
+test-all: clear-log recreate-db do-test-all
